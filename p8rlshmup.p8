@@ -29,6 +29,7 @@ end
 draw_systems = {}
 update_systems = {}
 
+-- background (just stars for now)
 bg = {}
 bg.cols = {1, 5, 6, 7}
 bg.stars={}
@@ -64,7 +65,6 @@ function _init()
     -- create the basic physics components
     local v = {p_x = 0, p_y = 0, v_x = 0, v_y = 0, a_x = 0, a_y = 0}
     ecs:create_component("physics", v)
-
 
     -- add a sprite component and a basic draw system
     ecs:create_component("sprite", {num = 0, flip_h = false, flip_v = false, w=1, h=1})
@@ -138,8 +138,15 @@ function _init()
         c.max_y = 128 - 8
         c.min_y = -3
     end
-
+  
     player_create()
+
+    -- particle generators....not using yet
+    -- TODO: These
+    local p_s = {p_x = 0, p_y = 0, d_x = 0, d_y = 0, timer = 30, spread = 0, die = true, particles = {}}
+    ecs:create_component("particle_generator", p_s)
+
+    -- initialize the background
     bg:init()
 end
 
