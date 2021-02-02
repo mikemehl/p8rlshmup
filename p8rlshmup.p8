@@ -15,13 +15,50 @@ function buttons:update()
     self.o = btn(4)
 end
 
+-- did the user press anything??
 function buttons:any()
     return self.up or self.down or self.left or self.right or self.x or self.o
+end
+
+-- did the user press a directional button???
+function buttons:dir()
+    return self.up or self.down or self.left or self.right
 end
 
 -- load systems into these tables
 draw_systems = {}
 update_systems = {}
+
+bg = {}
+bg.cols = {1, 5, 6, 7}
+bg.stars={}
+function bg:init()
+    for z = 1,4 do
+       for n=1,10 do
+          add(self.stars, {
+              x = flr(rnd(128)),
+              y = flr(rnd(128)),
+              z = z
+          })
+        end
+    end
+end
+
+function bg:update()
+    for star in all(self.stars) do
+        star.y += star.z * 2
+        if star.y > 128 then
+            star.y = 0
+            star.x = flr(rnd(128))
+        end
+    end
+end
+
+function bg:draw()
+    for star in all(self.stars) do
+        pset(star.x, star.y, self.cols[star.z])
+    end
+end
 
 function _init()
     -- create the basic physics components
@@ -44,11 +81,26 @@ function _init()
        function (eid) 
           local p = ecs:get_component(eid, "physics")
           p.a_x, p.a_y = 0, 0
-          if buttons.up then p.a_y -= 1 end
-          if buttons.down then p.a_y += 1 end
-          if buttons.left then p.a_x -= 1 end
-          if buttons.right then p.a_x += 1 end
-          if not buttons:any() then p.v_x, p.v_y = 0, 0 end
+          if buttons.up then p.a_y -= 0.5 end
+          if buttons.down then p.a_y += 0.5 end
+          if buttons.left then p.a_x -= 0.5 end
+          if buttons.right then p.a_x += 0.5 end
+          if not buttons:any() then 
+            if p.v_x < 0 then
+              p.v_x += 0.6
+              if p.v_x > 0 then p.v_x = 0 end
+            else
+              p.v_x -= 0.6
+              if p.v_x < 0 then p.v_x = 0 end
+            end
+            if p.v_y < 0 then
+              p.v_y += 0.6
+              if p.v_y > 0 then p.v_y = 0 end
+            else
+              p.v_y -= 0.6
+              if p.v_y < 0 then p.v_y = 0 end
+            end
+          end
     end))
 
     add(update_systems, ecs:system({"physics"}, 
@@ -88,10 +140,12 @@ function _init()
     end
 
     player_create()
+    bg:init()
 end
 
 function _update()
     buttons:update()
+    bg:update()
     for u in all(update_systems) do
         u()
     end
@@ -99,6 +153,7 @@ end
 
 function _draw()
     cls(0)
+    bg:draw()
     for d in all(draw_systems) do
         d()
     end
