@@ -26,7 +26,11 @@ end
 -- add the commponent "name" to the entity with id "eid" with default values from prototype table
 function ecs:add_component(eid, name)
   if self.components[name] and self.component_prototypes[name] then
-    return self:add_component(eid, name, self.component_prototypes[name])
+    self.components[name][eid] = {}
+    for k,v in pairs(self.component_prototypes[name]) do
+      self.components[name][eid][k] = v
+    end
+    return self.components[name][eid]
   end
   return nil
 end
