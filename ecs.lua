@@ -1,31 +1,37 @@
 ecs = {}
 ecs.curr_eid = 4
 ecs.entities = {}
-ecs.components = 
-{
-  position = {},
-  anim_sprite = {},
-  direction = {},
-  speed = {},
-  is_player = {},
-  is_string = {},
-  is_crutch = {},
-  death_timer = {},
-  squeak_ai = {},
-  tootsie_ai = {},
-  affects_squeak = {},
-  is_door = {},
-  is_bed = {}
-}
+ecs.components = {}
+ecs.component_prototypes = {}
 
+-- create a new type of component called "name" with default values in table "proto"
+function ecs:create_component(name, proto)
+  if self.components[name] then
+    return false
+  end
+  self.components[name] = {}
+  self.component_prototypes[name] = proto
+  return true
+end
+
+-- add the component "name" to the entity with id "eid", with default values in table "vals"
 function ecs:add_component(eid, name, vals)
   if self.components[name] then
     self.components[name][eid] = vals   
-    return true
+    return self.components[name][eid] 
   end
-  return false
+  return nil 
 end
 
+-- add the commponent "name" to the entity with id "eid" with default values from prototype table
+function ecs:add_component(eid, name)
+  if self.components[name] and self.component_prototypes[name] then
+    return self:add_component(eid, name, self.component_prototypes[name])
+  end
+  return nil
+end
+
+-- remove the component "name" from entity with id "eid"
 function ecs:remove_component(eid, name)
   if self.components[name] then
     self.components[name][eid] = nil
@@ -34,6 +40,7 @@ function ecs:remove_component(eid, name)
   return false
 end
 
+-- get a reference to the component "name" associated with entity with id "eid" (if it exists)
 function ecs:get_component(eid, name)
   if self.components[name] then
     return self.components[name][eid] 
@@ -41,6 +48,7 @@ function ecs:get_component(eid, name)
   return nil 
 end
 
+-- check if an entity has a component
 function ecs:has_component(eid, name)
   if self.components[name] then 
     return true
@@ -48,6 +56,7 @@ function ecs:has_component(eid, name)
   return false
 end
 
+-- create a new entity. returns the entity's id.
 function ecs:new_entity()
    local ret_val = self.curr_eid
    self.curr_eid = self.curr_eid + 2
@@ -55,13 +64,16 @@ function ecs:new_entity()
    return ret_val
 end
 
-function ecs:remove_entity(eid)
+-- delete an entity 
+function ecs:delete_entity(eid)
   for _, c in pairs(self.components) do
     if c[eid] then c[eid] = nil end
   end
   del(self.entities, eid)
 end
 
+-- create a system function that applies function "f" to all entities with componenets specified in table "comp_list"
+-- returns the created function
 function ecs:system(comp_list, f, ...)
   local r = function(...)
     for _,v in pairs(self.entities) do
