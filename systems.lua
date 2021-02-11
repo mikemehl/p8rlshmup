@@ -44,27 +44,6 @@ shmup_update_systems =
     function (eid) 
        local p = ecs:get_component(eid, "physics")
        local plyr = ecs:get_component(eid, "is_player")
-       p.a_x, p.a_y = 0, 0
-       if buttons.up then p.a_y -= 0.5 end
-       if buttons.down then p.a_y += 0.5 end
-       if buttons.left then p.a_x -= 0.5 end
-       if buttons.right then p.a_x += 0.5 end
-       if not buttons:any() then 
-         if p.v_x < 0 then
-           p.v_x += 0.6
-           if p.v_x > 0 then p.v_x = 0 end
-         else
-           p.v_x -= 0.6
-           if p.v_x < 0 then p.v_x = 0 end
-         end
-         if p.v_y < 0 then
-           p.v_y += 0.6
-           if p.v_y > 0 then p.v_y = 0 end
-         else
-           p.v_y -= 0.6
-           if p.v_y < 0 then p.v_y = 0 end
-         end
-       end
        if plyr.bullet_cooldown == 0 then
           if buttons.o then
              create_player_bullet_entity(eid)
@@ -72,6 +51,29 @@ shmup_update_systems =
           end
        else
           plyr.bullet_cooldown = plyr.bullet_cooldown - 1
+       end
+       p.a_x, p.a_y = 0, 0
+       if buttons.up then p.a_y -= 0.5 end
+       if buttons.down then p.a_y += 0.5 end
+       if buttons.left then p.a_x -= 0.5 end
+       if buttons.right then p.a_x += 0.5 end
+       p.v_x = mid(-9, p.v_x, 9)
+       p.v_y = mid(-9, p.v_y, 9)
+       if not buttons:dir() then 
+         if p.v_x < 0 then
+           p.v_x += 0.6
+           if p.v_x > 0 then p.v_x = 0 end
+         elseif p.v_x > 0 then
+           p.v_x -= 0.6
+           if p.v_x < 0 then p.v_x = 0 end
+         end
+         if p.v_y < 0 then
+           p.v_y += 0.6
+           if p.v_y > 0 then p.v_y = 0 end
+         elseif p.v_y > 0 then
+           p.v_y -= 0.6
+           if p.v_y < 0 then p.v_y = 0 end
+         end
        end
     end),
 

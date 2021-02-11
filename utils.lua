@@ -25,7 +25,7 @@ bg.cols = {1, 5, 6, 7}
 bg.stars={}
 function bg:init()
     for z = 1,4 do
-       for n=1,10 do
+       for n=1,8 do
           add(self.stars, {
               x = flr(rnd(128)),
               y = flr(rnd(128)),
