@@ -82,10 +82,8 @@ shmup_update_systems =
        function (eid)
           local p = ecs:get_component(eid, "physics")
           local c = ecs:get_component(eid, "clamp_pos")
-          if p.p_x < c.min_x then p.p_x = c.min_x end
-          if p.p_x > c.max_x then p.p_x = c.max_x end
-          if p.p_y > c.max_y then p.p_y = c.max_y end
-          if p.p_y < c.min_y then p.p_y = c.min_y end
+          p.p_x = mid(c.min_x, p.p_x, c.max_x)
+          p.p_y = mid(c.min_y, p.p_y, c.max_y)
     end),
 
   -- remove offscreen entities system
