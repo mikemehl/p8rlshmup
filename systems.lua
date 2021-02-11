@@ -2,11 +2,28 @@
 -- regular shmupping systems-------
 shmup_draw_systems = 
 {
+    -- draw sprites system
     ecs:system({"sprite", "physics"}, 
        function (eid)
           local p = ecs:get_component(eid, "physics") 
           local s = ecs:get_component(eid, "sprite")
           spr(s.num, p.p_x, p.p_y, s.w, s.h, s.flip_h, s.flip_v)
+    end),
+
+    -- draw pixels system
+    ecs:system({"anim_pixel", "physics"},
+        function (eid)
+          local p = ecs:get_component(eid, "physics")
+          local a = ecs:get_component(eid, "anim_pixel")
+          pset(p.p_x, p.p_y, a.colors[a.curr_col])
+          a.frame_ct = a.frame_ct + 1
+          if a.frame_ct == a.frame_change then
+            a.curr_col = a.curr_col + 1
+            if a.curr_col > #a.colors then
+              a.curr_col = 1
+            end
+            a.frame_ct = 0
+          end
     end)
 }
 
@@ -26,6 +43,7 @@ shmup_update_systems =
  ecs:system({"is_player", "physics"}, 
     function (eid) 
        local p = ecs:get_component(eid, "physics")
+       local plyr = ecs:get_component(eid, "is_player")
        p.a_x, p.a_y = 0, 0
        if buttons.up then p.a_y -= 0.5 end
        if buttons.down then p.a_y += 0.5 end
@@ -47,6 +65,14 @@ shmup_update_systems =
            if p.v_y < 0 then p.v_y = 0 end
          end
        end
+       if plyr.bullet_cooldown == 0 then
+          if buttons.o then
+             create_player_bullet_entity(eid)
+             plyr.bullet_cooldown = 2
+          end
+       else
+          plyr.bullet_cooldown = plyr.bullet_cooldown - 1
+       end
     end),
 
  -- clamping system
@@ -58,7 +84,23 @@ shmup_update_systems =
           if p.p_x > c.max_x then p.p_x = c.max_x end
           if p.p_y > c.max_y then p.p_y = c.max_y end
           if p.p_y < c.min_y then p.p_y = c.min_y end
-    end)
+    end),
+
+  -- remove offscreen entities system
+  ecs:system({"die_offscreen", "physics"}, 
+        function(eid)
+         local p = ecs:get_component(eid, "physics") 
+         local d = ecs:get_component(eid, "die_offscreen") 
+         if d.vertical then
+            if(p.p_y < 0 or p.p_y > 128) then
+               ecs:delete_entity(eid)
+            end
+         elseif d.horizontal then
+            if(p.p_x < 0 or p.p_x > 128) then
+               ecs:delete_entity(eid)
+            end
+         end
+  end)
 }
 
 function shmup_draw()
