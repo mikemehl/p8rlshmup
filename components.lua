@@ -6,4 +6,5 @@ function init_components()
     ecs:create_component("anim_pixel", {colors = {0}, curr_col = 1, frame_ct=0, frame_change=5})
     ecs:create_component("die_offscreen", {vertical=true, horizontal=true})
     ecs:create_component("hitbox", {x1=0, y1=0, x2=0, y2=0})
+    ecs:create_component("health", {val=100})
 end

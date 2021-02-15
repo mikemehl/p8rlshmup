@@ -25,5 +25,6 @@ function create_player_bullet_entity(player_eid)
     pix.colors = {14, 12}
     pix.frame_change = 2
     local die = ecs:add_component(b, "die_offscreen")
+    sfx(0)
     return b
 end

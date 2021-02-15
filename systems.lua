@@ -57,8 +57,8 @@ shmup_update_systems =
        if buttons.down then p.a_y += 0.5 end
        if buttons.left then p.a_x -= 0.5 end
        if buttons.right then p.a_x += 0.5 end
-       p.v_x = mid(-9, p.v_x, 9)
-       p.v_y = mid(-9, p.v_y, 9)
+       p.v_x = mid(-5, p.v_x, 5)
+       p.v_y = mid(-5, p.v_y, 5)
        if not buttons:dir() then 
          if p.v_x < 0 then
            p.v_x += 0.6
